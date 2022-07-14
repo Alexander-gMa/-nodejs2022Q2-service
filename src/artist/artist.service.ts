@@ -45,12 +45,16 @@ export class ArtistService {
         error: 'Not Found',
       });
     }
-    this.database.artists[index] = {
+    const updatedArtist = {
       ...this.database.artists[index],
       ...updateArtistDto,
     };
+    this.database.artists[index] = {
+      ...this.database.artists[index],
+      ...updatedArtist,
+    };
 
-    return updateArtistDto;
+    return updatedArtist;
   }
 
   remove(id: number) {
