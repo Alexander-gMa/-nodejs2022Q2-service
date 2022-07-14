@@ -57,7 +57,9 @@ export class ArtistService {
     return updatedArtist;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} artist`;
+  remove(id: string) {
+    const existingArtist = this.findOne(id);
+    const index = this.database.artists.indexOf(existingArtist);
+    this.database.artists.splice(index, 1);
   }
 }
