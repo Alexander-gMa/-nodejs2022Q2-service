@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from 'src/user/user.model';
+import { ArtistModel } from 'src/artist/model/artist.model';
+import { UserModel } from 'src/user/model/user.model';
 
 @Injectable()
 export class DataBase {
   users: UserModel[] = [];
+  artists: ArtistModel[] = [];
 }
