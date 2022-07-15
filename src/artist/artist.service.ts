@@ -24,7 +24,7 @@ export class ArtistService {
 
   findOne(id: string) {
     const correctArtist = this.database.artists.filter(
-      (user) => user.id === id,
+      (artist) => artist.id === id,
     );
     if (correctArtist.length < 1)
       throw new NotFoundException({
