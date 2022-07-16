@@ -30,27 +30,27 @@ export class FavouriteController {
     return this.favouriteService.deleteTrack(id);
   }
 
-  // @Post('album/:id')
-  // @HttpCode(201)
-  // addAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-  //   return this.favouriteService.create(id);
-  // }
+  @Post('album/:id')
+  @HttpCode(201)
+  addAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.favouriteService.addAlbum(id);
+  }
 
-  // @Delete('album/:id')
-  // @HttpCode(204)
-  // deleteAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-  //   return this.favouriteService.create(id);
-  // }
+  @Delete('album/:id')
+  @HttpCode(204)
+  deleteAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.favouriteService.deleteAlbum(id);
+  }
 
-  // @Post('artist/:id')
-  // @HttpCode(201)
-  // addArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-  //   return this.favouriteService.create(id);
-  // }
+  @Post('artist/:id')
+  @HttpCode(201)
+  addArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.favouriteService.addArtist(id);
+  }
 
-  // @Delete('artist/:id')
-  // @HttpCode(204)
-  // deleteArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-  //   return this.favouriteService.create(id);
-  // }
+  @Delete('artist/:id')
+  @HttpCode(204)
+  deleteArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.favouriteService.deleteArtist(id);
+  }
 }
