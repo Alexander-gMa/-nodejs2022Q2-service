@@ -61,5 +61,11 @@ export class TrackService {
     const existingTrack = this.findOne(id);
     const index = this.database.tracks.indexOf(existingTrack);
     this.database.tracks.splice(index, 1);
+
+    const trackFav = this.database.favourites.tracks.filter(
+      (track) => track.id === id,
+    );
+    const indexFav = this.database.favourites.tracks.indexOf(trackFav[0]);
+    this.database.favourites.tracks.splice(indexFav, 1);
   }
 }

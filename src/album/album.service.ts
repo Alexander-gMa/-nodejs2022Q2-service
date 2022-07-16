@@ -62,5 +62,15 @@ export class AlbumService {
     const existingAlbum = this.findOne(id);
     const index = this.database.albums.indexOf(existingAlbum);
     this.database.albums.splice(index, 1);
+
+    const albumFav = this.database.favourites.albums.filter(
+      (album) => album.id === id,
+    );
+    const indexFav = this.database.favourites.albums.indexOf(albumFav[0]);
+    this.database.favourites.albums.splice(indexFav, 1);
+
+    this.database.tracks.forEach((track, index) => {
+      if (track.albumId === id) this.database.tracks[index].albumId = null;
+    });
   }
 }

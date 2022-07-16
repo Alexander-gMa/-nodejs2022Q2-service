@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { DataBase } from 'src/database/db';
 
 @Injectable()
@@ -11,9 +15,9 @@ export class FavouriteService {
 
   addTrack(id: string) {
     const track = this.database.tracks.find((track) => track.id === id);
-    if (track === undefined) {
-      throw new NotFoundException({
-        statusCode: 404,
+    if (!track) {
+      throw new UnprocessableEntityException({
+        statusCode: 422,
         message: `Track with this ID was not found`,
         error: 'Not Found',
       });
@@ -39,9 +43,9 @@ export class FavouriteService {
   addAlbum(id: string) {
     const album = this.database.albums.find((album) => album.id === id);
     if (album === undefined) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: `Track with this ID was not found`,
+      throw new UnprocessableEntityException({
+        statusCode: 422,
+        message: `Album with this ID was not found`,
         error: 'Not Found',
       });
     }
@@ -66,8 +70,8 @@ export class FavouriteService {
   addArtist(id: string) {
     const artist = this.database.artists.find((artist) => artist.id === id);
     if (artist === undefined) {
-      throw new NotFoundException({
-        statusCode: 404,
+      throw new UnprocessableEntityException({
+        statusCode: 422,
         message: `Artist with this ID was not found`,
         error: 'Not Found',
       });
@@ -83,7 +87,7 @@ export class FavouriteService {
     if (correctArtist.length < 1)
       throw new NotFoundException({
         statusCode: 404,
-        message: `Album with this ID was not found`,
+        message: `Artist with this ID was not found`,
         error: 'Not Found',
       });
     const index = this.database.favourites.artists.indexOf(correctArtist[0]);

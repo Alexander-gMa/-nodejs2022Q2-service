@@ -69,5 +69,19 @@ export class ArtistService {
     const existingArtist = this.findOne(id);
     const index = this.database.artists.indexOf(existingArtist);
     this.database.artists.splice(index, 1);
+
+    const artistFav = this.database.favourites.artists.filter(
+      (album) => album.id === id,
+    );
+    const indexFav = this.database.favourites.artists.indexOf(artistFav[0]);
+    this.database.favourites.artists.splice(indexFav, 1);
+
+    this.database.albums.forEach((el, index) => {
+      el.artistId === id ? (this.database.albums[index].artistId = null) : null;
+    });
+
+    this.database.tracks.forEach((el, index) => {
+      el.artistId === id ? (this.database.tracks[index].artistId = null) : null;
+    });
   }
 }
