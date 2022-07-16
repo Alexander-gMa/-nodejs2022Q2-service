@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Artist } from 'src/artist/entities/artist.entity';
 import { DataBase } from 'src/database/db';
 import { v4 } from 'uuid';
@@ -23,15 +23,44 @@ export class AlbumService {
     return this.database.albums;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string) {
+    const correctAlbum = this.database.albums.filter(
+      (album) => album.id === id,
+    );
+    if (correctAlbum.length < 1)
+      throw new NotFoundException({
+        statusCode: 404,
+        message: `Artist with this ID was not found`,
+        error: 'Not Found',
+      });
+    return correctAlbum[0];
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const existingAlbum = this.findOne(id);
+    const index = this.database.albums.indexOf(existingAlbum);
+    if (index === -1) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: `User with this ID was not found`,
+        error: 'Not Found',
+      });
+    }
+    const updatedAlbum = {
+      ...this.database.albums[index],
+      ...updateAlbumDto,
+    };
+    this.database.artists[index] = {
+      ...this.database.artists[index],
+      ...updatedAlbum,
+    };
+
+    return updatedAlbum;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string) {
+    const existingAlbum = this.findOne(id);
+    const index = this.database.albums.indexOf(existingAlbum);
+    this.database.albums.splice(index, 1);
   }
 }
