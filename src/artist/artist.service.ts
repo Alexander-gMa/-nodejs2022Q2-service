@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataBase } from 'src/database/db';
 import { v4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -38,6 +43,9 @@ export class ArtistService {
   update(id: string, updateArtistDto: UpdateArtistDto) {
     const existingArtist = this.findOne(id);
     const index = this.database.artists.indexOf(existingArtist);
+    if (updateArtistDto === {}) {
+      throw new HttpException(`artists field is empty`, HttpStatus.NO_CONTENT);
+    }
     if (index === -1) {
       throw new NotFoundException({
         statusCode: 404,
