@@ -63,6 +63,7 @@ export class UserService {
     user.version += 1;
     user.updatedAt = Date.now();
     this.database.users[index] = { ...this.database.users[index], ...user };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...updatedUser } = this.database.users[index];
     return updatedUser;
   }
