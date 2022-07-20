@@ -1,0 +1,16 @@
+services:
+  app:
+    container_name: app
+    image: node:lts-alpine
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    command: npm run start:dev
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      - PORT=${PORT}
+    volumes:
+      - ./:/usr/src/app/
+      - /usr/src/app/node_modules
