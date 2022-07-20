@@ -1,1 +1,1 @@
-FROM node:lts-alpine
+FROM postgres:14-alpine3.16
