@@ -23,6 +23,7 @@ services:
       dockerfile: ./src/database/Dockerfile
     ports:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    command: postgres -c logging_collector=on
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
