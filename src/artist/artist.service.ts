@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataBase } from 'src/database/db';
+import { plainToInstance } from 'class-transformer';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
@@ -12,76 +13,65 @@ import { Artist } from './entities/artist.entity';
 
 @Injectable()
 export class ArtistService {
-  constructor(private database: DataBase) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createArtistDto: CreateArtistDto) {
+  async create(createArtistDto: CreateArtistDto) {
     const artist = new Artist({
       id: v4(),
       ...createArtistDto,
     });
-    this.database.artists.push(artist);
-    return artist;
+    const createdArtist = await this.prisma.artist.create({
+      data: artist,
+    });
+    return createdArtist;
   }
 
-  findAll() {
-    return this.database.artists;
+  async findAll() {
+    return await this.prisma.artist.findMany();
   }
 
-  findOne(id: string) {
-    const correctArtist = this.database.artists.filter(
-      (artist) => artist.id === id,
-    );
-    if (correctArtist.length < 1)
+  async findOne(id: string) {
+    const correctArtist = await this.prisma.artist.findFirst({ where: { id } });
+    if (!correctArtist)
       throw new NotFoundException({
         statusCode: 404,
         message: `Artist with this ID was not found`,
         error: 'Not Found',
       });
-    return correctArtist[0];
+    return plainToInstance(Artist, correctArtist);
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const existingArtist = this.findOne(id);
-    const index = this.database.artists.indexOf(existingArtist);
-    if (updateArtistDto === {}) {
-      throw new HttpException(`artists field is empty`, HttpStatus.NO_CONTENT);
-    }
-    if (index === -1) {
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    const existingArtist = await this.prisma.artist.findFirst({
+      where: { id },
+    });
+    if (!existingArtist) {
       throw new NotFoundException({
         statusCode: 404,
         message: `User with this ID was not found`,
         error: 'Not Found',
       });
     }
-    const updatedArtist = {
-      ...this.database.artists[index],
-      ...updateArtistDto,
-    };
-    this.database.artists[index] = {
-      ...this.database.artists[index],
-      ...updatedArtist,
-    };
-
-    return updatedArtist;
+    if (updateArtistDto === {}) {
+      throw new HttpException(`artists field is empty`, HttpStatus.NO_CONTENT);
+    }
+    return this.prisma.artist.update({
+      where: { id },
+      data: { ...updateArtistDto },
+    });
   }
 
-  remove(id: string) {
-    const existingArtist = this.findOne(id);
-    const index = this.database.artists.indexOf(existingArtist);
-    this.database.artists.splice(index, 1);
-
-    const artistFav = this.database.favourites.artists.filter(
-      (album) => album.id === id,
-    );
-    const indexFav = this.database.favourites.artists.indexOf(artistFav[0]);
-    this.database.favourites.artists.splice(indexFav, 1);
-
-    this.database.albums.forEach((el, index) => {
-      el.artistId === id ? (this.database.albums[index].artistId = null) : null;
+  async remove(id: string) {
+    const existingArtist = await this.prisma.artist.findFirst({
+      where: { id },
     });
-
-    this.database.tracks.forEach((el, index) => {
-      el.artistId === id ? (this.database.tracks[index].artistId = null) : null;
-    });
+    if (!existingArtist) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: `User with this ID was not found`,
+        error: 'Not Found',
+      });
+    }
+    return await this.prisma.artist.delete({ where: { id } });
   }
 }

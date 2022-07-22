@@ -18,3 +18,9 @@ model User {
   password  String
   version   Int      @default(1)
 }
+
+model Artist {
+  id         String    @id @default(uuid())
+  name       String
+  grammy     Boolean
+}
