@@ -13,7 +13,7 @@ import { User } from './entities/user.entity';
 export class UserService {
   constructor(private database: DataBase) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const user = new User({
       id: v4(),
       ...createUserDto,
@@ -25,11 +25,11 @@ export class UserService {
     return user;
   }
 
-  findAll() {
+  async findAll() {
     return this.database.users;
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     const correctUser = this.database.users.filter((user) => user.id === id);
     if (correctUser.length < 1)
       throw new NotFoundException({
@@ -40,8 +40,8 @@ export class UserService {
     return correctUser[0];
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    const existingUser = this.findOne(id);
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const existingUser = await this.findOne(id);
     const index = this.database.users.indexOf(existingUser);
     if (index === -1) {
       throw new NotFoundException({
@@ -68,8 +68,8 @@ export class UserService {
     return updatedUser;
   }
 
-  remove(id: string) {
-    const existingUser = this.findOne(id);
+  async remove(id: string) {
+    const existingUser = await this.findOne(id);
     const index = this.database.users.indexOf(existingUser);
     this.database.users.splice(index, 1);
   }
