@@ -12,7 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
   imports: [
     UserModule,
     ArtistModule,
-    // TrackModule,
+    TrackModule,
     // AlbumModule,
     // FavouriteModule,
     PrismaModule,

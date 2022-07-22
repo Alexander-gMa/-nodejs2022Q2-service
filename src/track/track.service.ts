@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataBase } from 'src/database/db';
+import { plainToInstance } from 'class-transformer';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
@@ -7,65 +8,62 @@ import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
-  constructor(private database: DataBase) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createTrackDto: CreateTrackDto) {
+  async create(createTrackDto: CreateTrackDto) {
     const track = new Track({
       id: v4(),
       ...createTrackDto,
     });
-    this.database.tracks.push(track);
-    return track;
+    const createdTrack = await this.prisma.track.create({
+      data: track,
+    });
+    return createdTrack;
   }
 
-  findAll() {
-    return this.database.tracks;
+  async findAll() {
+    return await this.prisma.track.findMany();
   }
 
-  findOne(id: string) {
-    const correctTrack = this.database.tracks.filter(
-      (track) => track.id === id,
-    );
-    if (correctTrack.length < 1)
+  async findOne(id: string) {
+    const correctTrack = await this.prisma.track.findFirst({ where: { id } });
+    if (!correctTrack)
       throw new NotFoundException({
         statusCode: 404,
-        message: `Track with this ID was not found`,
+        message: `Artist with this ID was not found`,
         error: 'Not Found',
       });
-    return correctTrack[0];
+    return plainToInstance(Track, correctTrack);
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const existingTrack = this.findOne(id);
-    const index = this.database.tracks.indexOf(existingTrack);
-    if (index === -1) {
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    const existingTrack = await this.prisma.track.findFirst({
+      where: { id },
+    });
+    if (!existingTrack) {
       throw new NotFoundException({
         statusCode: 404,
         message: `User with this ID was not found`,
         error: 'Not Found',
       });
     }
-    const updatedTrack = {
-      ...this.database.tracks[index],
-      ...updateTrackDto,
-    };
-    this.database.tracks[index] = {
-      ...this.database.tracks[index],
-      ...updatedTrack,
-    };
-
-    return updatedTrack;
+    return this.prisma.track.update({
+      where: { id },
+      data: { ...updateTrackDto },
+    });
   }
 
-  remove(id: string) {
-    const existingTrack = this.findOne(id);
-    const index = this.database.tracks.indexOf(existingTrack);
-    this.database.tracks.splice(index, 1);
-
-    const trackFav = this.database.favourites.tracks.filter(
-      (track) => track.id === id,
-    );
-    const indexFav = this.database.favourites.tracks.indexOf(trackFav[0]);
-    this.database.favourites.tracks.splice(indexFav, 1);
+  async remove(id: string) {
+    const existingTrack = await this.prisma.track.findFirst({
+      where: { id },
+    });
+    if (!existingTrack) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: `User with this ID was not found`,
+        error: 'Not Found',
+      });
+    }
+    return await this.prisma.track.delete({ where: { id } });
   }
 }
