@@ -11,10 +11,10 @@ import { PrismaModule } from './prisma/prisma.module';
 @Module({
   imports: [
     UserModule,
-    ArtistModule,
-    TrackModule,
-    AlbumModule,
-    FavouriteModule,
+    // ArtistModule,
+    // TrackModule,
+    // AlbumModule,
+    // FavouriteModule,
     PrismaModule,
   ],
   controllers: [AppController],

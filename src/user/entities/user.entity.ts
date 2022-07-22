@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 
 export class User {
   constructor(partial: Partial<User>) {
@@ -13,7 +13,9 @@ export class User {
 
   version: number;
 
-  createdAt: number;
+  @Transform(({ value }) => new Date(value).getTime())
+  createdAt: Date;
 
-  updatedAt: number;
+  @Transform(({ value }) => new Date(value).getTime())
+  updatedAt: Date;
 }
