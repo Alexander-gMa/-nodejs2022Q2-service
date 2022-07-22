@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataBase } from 'src/database/db';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
@@ -7,69 +13,65 @@ import { Album } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
-  constructor(private database: DataBase) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createAlbumDto: CreateAlbumDto) {
+  async create(createAlbumDto: CreateAlbumDto) {
     const album = new Album({
       id: v4(),
       ...createAlbumDto,
     });
-    this.database.albums.push(album);
-    return album;
+    const createdAlbum = await this.prisma.album.create({
+      data: album,
+    });
+    return createdAlbum;
   }
 
-  findAll() {
-    return this.database.albums;
+  async findAll() {
+    return await this.prisma.album.findMany();
   }
 
-  findOne(id: string) {
-    const correctAlbum = this.database.albums.filter(
-      (album) => album.id === id,
-    );
-    if (correctAlbum.length < 1)
+  async findOne(id: string) {
+    const correctAlbum = await this.prisma.album.findFirst({ where: { id } });
+    if (!correctAlbum)
       throw new NotFoundException({
         statusCode: 404,
         message: `Artist with this ID was not found`,
         error: 'Not Found',
       });
-    return correctAlbum[0];
+    return plainToInstance(Album, correctAlbum);
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    const existingAlbum = this.findOne(id);
-    const index = this.database.albums.indexOf(existingAlbum);
-    if (index === -1) {
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const existingAlbum = await this.prisma.album.findFirst({
+      where: { id },
+    });
+    if (!existingAlbum) {
       throw new NotFoundException({
         statusCode: 404,
         message: `User with this ID was not found`,
         error: 'Not Found',
       });
     }
-    const updatedAlbum = {
-      ...this.database.albums[index],
-      ...updateAlbumDto,
-    };
-    this.database.artists[index] = {
-      ...this.database.artists[index],
-      ...updatedAlbum,
-    };
-
-    return updatedAlbum;
+    if (updateAlbumDto === {}) {
+      throw new HttpException(`artists field is empty`, HttpStatus.NO_CONTENT);
+    }
+    return this.prisma.album.update({
+      where: { id },
+      data: { ...updateAlbumDto },
+    });
   }
 
-  remove(id: string) {
-    const existingAlbum = this.findOne(id);
-    const index = this.database.albums.indexOf(existingAlbum);
-    this.database.albums.splice(index, 1);
-
-    const albumFav = this.database.favourites.albums.filter(
-      (album) => album.id === id,
-    );
-    const indexFav = this.database.favourites.albums.indexOf(albumFav[0]);
-    this.database.favourites.albums.splice(indexFav, 1);
-
-    this.database.tracks.forEach((track, index) => {
-      if (track.albumId === id) this.database.tracks[index].albumId = null;
+  async remove(id: string) {
+    const existingAlbum = await this.prisma.album.findFirst({
+      where: { id },
     });
+    if (!existingAlbum) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: `User with this ID was not found`,
+        error: 'Not Found',
+      });
+    }
+    return await this.prisma.album.delete({ where: { id } });
   }
 }

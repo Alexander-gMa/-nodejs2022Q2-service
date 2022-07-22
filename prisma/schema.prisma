@@ -32,4 +32,14 @@ model Track {
   artistId   String?
   albumId    String?
   favoriteId String?
+  albums     Album?    @relation(fields: [albumId], references: [id], onDelete: SetNull)
+}
+
+model Album {
+  id         String    @id @default(uuid())
+  name       String
+  year       Int
+  artistId   String?
+  tracks     Track[]
+  favoriteId String?
 }
