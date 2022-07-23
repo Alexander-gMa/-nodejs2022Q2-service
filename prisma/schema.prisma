@@ -11,16 +11,16 @@ datasource db {
 }
 
 model User {
-  id        String   
+  id        String   @id @default(uuid())
   login     String
   password  String
   version   Int      @default(1)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 model Artist {
-  id         String    
+  id         String    @id @default(uuid())
   name       String
   grammy     Boolean
   albums     Album[]
@@ -30,7 +30,7 @@ model Artist {
 }
 
 model Album {
-  id         String   
+  id         String    @id @default(uuid())
   name       String
   year       Int
   artist     Artist?   @relation(fields: [artistId], references: [id], onDelete: SetNull)
@@ -47,7 +47,7 @@ model Track {
   albumId    String?
   favs       Favorite? @relation(fields: [favoriteId], references: [id], onDelete: SetNull)
   favoriteId String?
-  id         String   
+  id         String    @id @default(uuid())
   name       String
   duration   Int
 
@@ -57,5 +57,5 @@ model Favorite {
   artists Artist[]
   albums  Album[]
   tracks  Track[]
-  id      String 
+  id      String   @id @default(uuid())
 }
