@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { DataBase } from 'src/database/db';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class FavouriteService {
-  constructor(private database: DataBase) {}
+  constructor(private database: DataBase, private prisma: PrismaService) {}
 
   findAll() {
     return this.database.favourites;
@@ -27,17 +24,10 @@ export class FavouriteService {
   }
 
   deleteTrack(id: string) {
-    const correctTrack = this.database.favourites.tracks.filter(
-      (track) => track.id === id,
-    );
-    if (correctTrack.length < 1)
-      throw new NotFoundException({
-        statusCode: 404,
-        message: `Artist with this ID was not found`,
-        error: 'Not Found',
-      });
-    const index = this.database.favourites.tracks.indexOf(correctTrack[0]);
-    this.database.favourites.tracks.splice(index, 1);
+    return this.prisma.track.update({
+      where: { id },
+      data: { favoriteId: { set: null } },
+    });
   }
 
   addAlbum(id: string) {
@@ -54,43 +44,26 @@ export class FavouriteService {
   }
 
   deleteAlbum(id: string) {
-    const correctAlbum = this.database.favourites.albums.filter(
-      (album) => album.id === id,
-    );
-    if (correctAlbum.length < 1)
-      throw new NotFoundException({
-        statusCode: 404,
-        message: `Album with this ID was not found`,
-        error: 'Not Found',
-      });
-    const index = this.database.favourites.albums.indexOf(correctAlbum[0]);
-    this.database.favourites.albums.splice(index, 1);
+    return this.prisma.album.update({
+      where: { id },
+      data: { favoriteId: { set: null } },
+    });
   }
 
-  addArtist(id: string) {
-    const artist = this.database.artists.find((artist) => artist.id === id);
+  async addArtist(id: string) {
+    const artist = await this.prisma.artist.findFirst({ where: { id } });
     if (artist === undefined) {
       throw new UnprocessableEntityException({
         statusCode: 422,
-        message: `Artist with this ID was not found`,
+        message: `Album with this ID was not found`,
         error: 'Not Found',
       });
     }
-    this.database.favourites.artists.push(artist);
-    return artist;
+
+    return { statusCode: 201, message: 'Added successfully' };
   }
 
   deleteArtist(id: string) {
-    const correctArtist = this.database.favourites.artists.filter(
-      (artist) => artist.id === id,
-    );
-    if (correctArtist.length < 1)
-      throw new NotFoundException({
-        statusCode: 404,
-        message: `Artist with this ID was not found`,
-        error: 'Not Found',
-      });
-    const index = this.database.favourites.artists.indexOf(correctArtist[0]);
-    this.database.favourites.artists.splice(index, 1);
+    return null;
   }
 }

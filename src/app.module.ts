@@ -14,7 +14,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ArtistModule,
     TrackModule,
     AlbumModule,
-    // FavouriteModule,
+    FavouriteModule,
     PrismaModule,
   ],
   controllers: [AppController],
