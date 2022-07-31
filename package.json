@@ -21,7 +21,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "docker:build": "docker compose up -d --build",
     "scan:app": "docker scan nodejs2022q2-service_app",
-    "scan:db": "docker scan nodejs2022q2-service_database"
+    "scan:db": "docker scan nodejs2022q2-service_database",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate:dev": "npx prisma migrate dev --name init"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

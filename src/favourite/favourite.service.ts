@@ -12,7 +12,6 @@ export class FavouriteService {
   async addTrack(id: string) {
     const track = await this.prisma.track.findFirst({ where: { id } });
     const favorites = await this.prisma.favorite.findMany();
-    const createdTrack = await this.prisma.favorite.create({ data: {} });
     if (!track) {
       throw new UnprocessableEntityException({
         statusCode: 422,
@@ -20,6 +19,7 @@ export class FavouriteService {
         error: 'Not Found',
       });
     }
+    const createdTrack = await this.prisma.favorite.create({ data: track });
     !favorites
       ? await this.prisma.track.update({
           where: { id },
